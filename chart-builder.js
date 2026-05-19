@@ -185,8 +185,10 @@ function buildChart(canvas, type, aggResult, config, headers) {
           label: function(ctx) {
             const ds = ctx.dataset.label || '';
             let rawVal;
-            if (type === 'pie' || type === 'doughnut' || type === 'polarArea') {
-              rawVal = ctx.parsed;  // pie/doughnut/polar: parsed IS the number
+            if (type === 'pie' || type === 'doughnut') {
+              rawVal = ctx.parsed;
+            } else if (type === 'polarArea') {
+              rawVal = ctx.parsed.r;
             } else if (type === 'barH' || type === 'stackedH') {
               rawVal = ctx.parsed.x;
             } else {
