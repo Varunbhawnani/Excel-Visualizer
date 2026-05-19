@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DataViz Pro — Excel Dashboard Builder</title>
+  <meta name="description" content="Transform your Excel data into stunning, interactive visualizations with DataViz Pro.">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ═══════════ TOP NAV BAR ═══════════ -->
+  <nav id="top-nav" class="hidden">
+    <div class="nav-brand">
+      <span class="brand-icon">◈</span>
+      <span class="brand-text">DataViz <span class="brand-accent">Pro</span></span>
+    </div>
+    <div class="nav-info">
+      <span class="nav-pill" id="nav-file-name"></span>
+      <span class="nav-pill" id="nav-sheet-name"></span>
+    </div>
+    <div class="nav-actions">
+      <button class="btn-ghost" id="nav-new-file">
+        <span>↑</span> New File
+      </button>
+      <button class="btn-primary btn-sm hidden" id="nav-add-viz">
+        <span>+</span> Add Visualization
+      </button>
+      <button class="theme-toggle" id="theme-toggle" title="Toggle theme">🌙</button>
+    </div>
+  </nav>
+
+  <main>
+    <!-- ═══════════ UPLOAD SECTION ═══════════ -->
+    <section id="upload-section" class="active-section">
+      <button class="theme-toggle upload-theme-toggle" id="upload-theme-toggle" title="Toggle theme">🌙</button>
+      <div class="upload-container">
+        <div class="upload-branding">
+          <div class="brand-logo">◈</div>
+          <h1>DataViz <span class="gradient-text">Pro</span></h1>
+          <p class="upload-subtitle">Transform your Excel data into stunning visualizations</p>
+        </div>
+        <div class="upload-zone" id="upload-zone">
+          <div class="upload-zone-inner">
+            <div class="upload-icon">
+              <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+                <rect x="8" y="8" width="48" height="48" rx="8" stroke="url(#grad1)" stroke-width="2" stroke-dasharray="6 4"/>
+                <path d="M32 20V44M24 28L32 20L40 28" stroke="url(#grad1)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <defs><linearGradient id="grad1" x1="8" y1="8" x2="56" y2="56"><stop stop-color="#6366f1"/><stop offset="1" stop-color="#a855f7"/></linearGradient></defs>
+              </svg>
+            </div>
+            <h3>Drop your Excel file here</h3>
+            <p>or <span class="upload-browse">click to browse</span></p>
+            <p class="upload-formats">.xlsx &nbsp;·&nbsp; .xls &nbsp;·&nbsp; .csv</p>
+          </div>
+          <input type="file" id="file-input" accept=".xlsx,.xls,.csv">
+        </div>
+        <div class="upload-features">
+          <div class="feature-pill"><span>⚡</span> Client-side processing</div>
+          <div class="feature-pill"><span>🔒</span> Your data stays private</div>
+          <div class="feature-pill"><span>📊</span> 9 chart types</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════ LOADING OVERLAY ═══════════ -->
+    <div id="loading-overlay" class="hidden">
+      <div class="loader-card">
+        <div class="spinner"></div>
+        <h3>Parsing your data...</h3>
+        <p id="loading-details">Reading file contents</p>
+      </div>
+    </div>
+
+    <!-- ═══════════ SHEET SELECTOR ═══════════ -->
+    <section id="sheet-section" class="hidden">
+      <div class="sheet-selector-card">
+        <h2>📑 Multiple Sheets Detected</h2>
+        <p>Select which sheet to analyze</p>
+        <div id="sheet-list" class="sheet-list"></div>
+      </div>
+    </section>
+
+    <!-- ═══════════ PREVIEW SECTION ═══════════ -->
+    <section id="preview-section" class="hidden">
+      <div class="preview-stats">
+        <div class="stat-card">
+          <span class="stat-value" id="stat-rows">0</span>
+          <span class="stat-label">Data Rows</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value" id="stat-cols">0</span>
+          <span class="stat-label">Columns</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value" id="stat-sheet">—</span>
+          <span class="stat-label">Active Sheet</span>
+        </div>
+      </div>
+
+      <div class="preview-card">
+        <div class="card-header">
+          <h3>Detected Headers</h3>
+        </div>
+        <div id="header-chips" class="header-chips"></div>
+      </div>
+
+      <div class="preview-card">
+        <div class="card-header">
+          <h3>Data Preview</h3>
+          <span class="badge">First 10 rows</span>
+        </div>
+        <div class="table-scroll">
+          <table id="preview-table"></table>
+        </div>
+      </div>
+
+      <div class="create-viz-cta">
+        <button id="create-viz-btn" class="btn-primary btn-lg pulse-glow">
+          <span>✨</span> Create Your First Visualization
+        </button>
+      </div>
+    </section>
+
+    <!-- ═══════════ DASHBOARD SECTION ═══════════ -->
+    <section id="dashboard-section" class="hidden">
+      <div class="dashboard-header">
+        <h2>📊 Your Dashboard</h2>
+        <button id="dashboard-add-btn" class="btn-primary">
+          <span>+</span> Add Visualization
+        </button>
+      </div>
+      <div id="dashboard-grid" class="dashboard-grid"></div>
+    </section>
+  </main>
+
+  <!-- ═══════════ WIZARD MODAL ═══════════ -->
+  <div id="wizard-overlay" class="modal-overlay hidden">
+    <div class="wizard-modal">
+      <button class="modal-close" id="wizard-close">&times;</button>
+
+      <div class="wizard-progress">
+        <div class="progress-step active" data-step="1"><span>1</span></div>
+        <div class="progress-line"><div class="progress-fill" id="progress-fill"></div></div>
+        <div class="progress-step" data-step="2"><span>2</span></div>
+        <div class="progress-line"><div class="progress-fill"></div></div>
+        <div class="progress-step" data-step="3"><span>3</span></div>
+        <div class="progress-line"><div class="progress-fill"></div></div>
+        <div class="progress-step" data-step="4"><span>4</span></div>
+        <div class="progress-line"><div class="progress-fill"></div></div>
+        <div class="progress-step" data-step="5"><span>5</span></div>
+      </div>
+
+      <div class="wizard-body">
+        <!-- Step 1: Primary Column -->
+        <div class="wizard-step active" id="wizard-step-1">
+          <h3>Select Primary Column</h3>
+          <p class="step-desc">Choose the column to group your data by</p>
+          <div id="primary-col-list" class="column-grid"></div>
+        </div>
+
+        <!-- Step 2: Primary Filter -->
+        <div class="wizard-step" id="wizard-step-2">
+          <h3>Filter Values <span class="optional-badge">Optional</span></h3>
+          <p class="step-desc">Enter specific values to include from "<strong id="primary-col-name"></strong>"</p>
+          <p class="step-hint">Leave empty to include all unique values</p>
+          <div class="tag-input-wrapper">
+            <div class="tag-input-box" id="primary-tag-box">
+              <div class="tags-area" id="primary-tags"></div>
+              <input type="text" id="primary-filter-input" placeholder="Type to search..." autocomplete="off">
+            </div>
+            <div class="autocomplete-dropdown hidden" id="primary-autocomplete"></div>
+          </div>
+          <div class="tag-actions">
+            <button class="btn-ghost btn-xs" id="primary-add-all">+ Add All</button>
+            <button class="btn-ghost btn-xs" id="primary-clear-all">✕ Clear All</button>
+            <span class="tag-count" id="primary-tag-count">0 selected</span>
+          </div>
+        </div>
+
+        <!-- Step 3: Measure Column -->
+        <div class="wizard-step" id="wizard-step-3">
+          <h3>Select Analysis Column</h3>
+          <p class="step-desc">Choose what to measure against "<strong id="primary-col-name-2"></strong>"</p>
+          <button id="single-col-btn" class="single-col-option">
+            <span class="option-icon">📊</span>
+            <div>
+              <strong>Count occurrences only</strong>
+              <span>Show distribution of the primary column</span>
+            </div>
+          </button>
+          <div class="divider-line"><span>or cross-reference with</span></div>
+          <div id="measure-col-list" class="column-grid"></div>
+        </div>
+
+        <!-- Step 4: Measure Filter -->
+        <div class="wizard-step" id="wizard-step-4">
+          <h3>Filter Values <span class="optional-badge">Optional</span></h3>
+          <p class="step-desc">Enter specific values to include from "<strong id="measure-col-name"></strong>"</p>
+          <p class="step-hint">Leave empty to include all unique values</p>
+          <div class="tag-input-wrapper">
+            <div class="tag-input-box" id="measure-tag-box">
+              <div class="tags-area" id="measure-tags"></div>
+              <input type="text" id="measure-filter-input" placeholder="Type to search..." autocomplete="off">
+            </div>
+            <div class="autocomplete-dropdown hidden" id="measure-autocomplete"></div>
+          </div>
+          <div class="tag-actions">
+            <button class="btn-ghost btn-xs" id="measure-add-all">+ Add All</button>
+            <button class="btn-ghost btn-xs" id="measure-clear-all">✕ Clear All</button>
+            <span class="tag-count" id="measure-tag-count">0 selected</span>
+          </div>
+          <div id="aggregation-section" class="hidden">
+            <h4>Aggregation Method</h4>
+            <div class="agg-options" id="agg-options">
+              <button class="agg-btn active" data-agg="sum">Σ Sum</button>
+              <button class="agg-btn" data-agg="average">μ Average</button>
+              <button class="agg-btn" data-agg="count"># Count</button>
+              <button class="agg-btn" data-agg="min">↓ Min</button>
+              <button class="agg-btn" data-agg="max">↑ Max</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 5: Chart Type -->
+        <div class="wizard-step" id="wizard-step-5">
+          <h3>Choose Chart Type</h3>
+          <p class="step-desc">Select one or more visualization types</p>
+          <div id="chart-type-grid" class="chart-type-grid"></div>
+        </div>
+      </div>
+
+      <div class="wizard-footer">
+        <button id="wizard-back" class="btn-secondary" disabled>← Back</button>
+        <button id="wizard-next" class="btn-primary">Next →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ FULLSCREEN CHART MODAL ═══════════ -->
+  <div id="fullscreen-overlay" class="modal-overlay hidden">
+    <div class="fullscreen-modal">
+      <button class="modal-close" id="fullscreen-close">&times;</button>
+      <h2 id="fullscreen-title"></h2>
+      <div id="fullscreen-chart-container" class="fullscreen-chart-container"></div>
+    </div>
+  </div>
+
+  <!-- CDN Libraries -->
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+
+  <!-- App Scripts -->
+  <script src="chart-builder.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
